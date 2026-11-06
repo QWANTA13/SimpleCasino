@@ -17,7 +17,6 @@ import java.util.Random;
 public class SlotMachineMenu extends AbstractContainerMenu {
     public static final int[] BETS = {1, 5, 10, 20};
 
-    // data: reel0, reel1, reel2, betIndex, spinning(0/1), lastWin
     private final ContainerData data;
     private final Random random = new Random();
 
@@ -29,20 +28,18 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         super(ModMenus.SLOT_MACHINE.get(), id);
         this.data = new SimpleContainerData(6);
 
-        // default bet = 1 diamond
         data.set(3, 0);
         data.set(0, SlotSymbols.CHERRY);
         data.set(1, SlotSymbols.LEMON);
         data.set(2, SlotSymbols.SEVEN);
 
-        // player inventory
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
+                addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, 104 + row * 18));
             }
         }
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(playerInv, col, 8 + col * 18, 142));
+            addSlot(new Slot(playerInv, col, 8 + col * 18, 162));
         }
 
         addDataSlots(data);
@@ -71,13 +68,9 @@ public class SlotMachineMenu extends AbstractContainerMenu {
     }
 
     public void cycleBet() {
-        int next = (getBetIndex() + 1) % BETS.length;
-        data.set(3, next);
+        data.set(3, (getBetIndex() + 1) % BETS.length);
     }
 
-    /**
-     * Server-side spin. Returns true if spin started.
-     */
     public boolean trySpin(ServerPlayer player) {
         if (isSpinning()) return false;
 
@@ -89,13 +82,19 @@ public class SlotMachineMenu extends AbstractContainerMenu {
             return false;
         }
 
-        data.set(4, 1); // spinning flag (for UI)
+        data.set(4, 1);
         data.set(5, 0);
 
-        int r0 = random.nextInt(SlotSymbols.COUNT);
-        int r1 = random.nextInt(SlotSymbols.COUNT);
-        int r2 = random.nextInt(SlotSymbols.COUNT);
-        // slight bias: make pure random; jackpot is rare enough via 1/125
+        int r0, r1, r2;
+        // \~18% шанс тройки (раньше было \~4%)
+        if (random.nextInt(100) < 18) {
+            int symbol = rollWeightedSymbol();
+            r0 = r1 = r2 = symbol;
+        } else {
+            r0 = rollWeightedSymbol();
+            r1 = rollWeightedSymbol();
+            r2 = rollWeightedSymbol();
+        }
 
         data.set(0, r0);
         data.set(1, r1);
@@ -105,8 +104,7 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         if (r0 == r1 && r1 == r2) {
             win = bet * SlotSymbols.tripleMultiplier(r0);
         } else if (r0 == r1 || r1 == r2 || r0 == r2) {
-            // two matching: small consolation = bet back sometimes? keep simple: no win
-            win = 0;
+            win = bet / 2; // два одинаковых — половина ставки
         }
 
         if (win > 0) {
@@ -117,15 +115,24 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         return true;
     }
 
+    private int rollWeightedSymbol() {
+        int roll = random.nextInt(100);
+        if (roll < 35) return SlotSymbols.CHERRY;
+        if (roll < 60) return SlotSymbols.LEMON;
+        if (roll < 78) return SlotSymbols.DIAMOND;
+        if (roll < 92) return SlotSymbols.SEVEN;
+        return SlotSymbols.BAR;
+    }
+
     private static boolean takeDiamonds(ServerPlayer player, int amount) {
         int left = amount;
         var inv = player.getInventory();
-        // count
         int total = 0;
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack stack = inv.getItem(i);
             if (stack.is(Items.DIAMOND)) total += stack.getCount();
-        }
+23:17
+}
         if (total < amount) return false;
 
         for (int i = 0; i < inv.getContainerSize() && left > 0; i++) {
