@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "simplecasino:block/slot_machine_top",
+    "bottom": "simplecasino:block/slot_machine_bottom",
+    "side": "simplecasino:block/slot_machine_side"
+  }
+}

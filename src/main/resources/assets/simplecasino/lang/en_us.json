@@ -1,0 +1,10 @@
+{
+  "block.simplecasino.slot_machine": "Slot Machine",
+  "item.simplecasino.slot_machine": "Slot Machine",
+  "itemGroup.simplecasino": "Simple Casino",
+  "gui.simplecasino.spin": "SPIN",
+  "gui.simplecasino.bet": "Bet",
+  "gui.simplecasino.bet_value": "Bet: %s",
+  "gui.simplecasino.win": "Win: %s",
+  "message.simplecasino.not_enough_diamonds": "Not enough diamonds!"
+}

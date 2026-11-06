@@ -1,0 +1,10 @@
+{
+  "block.simplecasino.slot_machine": "Слот-машина",
+  "item.simplecasino.slot_machine": "Слот-машина",
+  "itemGroup.simplecasino": "Simple Casino",
+  "gui.simplecasino.spin": "КРУТИТЬ",
+  "gui.simplecasino.bet": "Ставка",
+  "gui.simplecasino.bet_value": "Ставка: %s",
+  "gui.simplecasino.win": "Выигрыш: %s",
+  "message.simplecasino.not_enough_diamonds": "Не хватает алмазов!"
+}
