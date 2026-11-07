@@ -131,8 +131,7 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack stack = inv.getItem(i);
             if (stack.is(Items.DIAMOND)) total += stack.getCount();
-23:17
-}
+        }
         if (total < amount) return false;
 
         for (int i = 0; i < inv.getContainerSize() && left > 0; i++) {
@@ -145,7 +144,7 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         return true;
     }
 
-    private static void giveDiamonds(ServerPlayer player, int amount) {
+     private static void giveDiamonds(ServerPlayer player, int amount) {
         ItemStack stack = new ItemStack(Items.DIAMOND, amount);
         if (!player.getInventory().add(stack)) {
             player.drop(stack, false);
