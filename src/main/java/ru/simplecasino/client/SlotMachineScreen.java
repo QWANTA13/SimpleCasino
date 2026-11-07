@@ -107,9 +107,7 @@ public class SlotMachineScreen extends AbstractContainerScreen<SlotMachineMenu> 
             g.fill(rx - 1, baseY - 1, rx + 33, baseY + 33, 0xFF000000);
             g.fill(rx, baseY, rx + 32, baseY + 32, 0xFF0A0A12);
 
-            int symbol
-23:19
-= animTicksLeft > 0 ? animReels[i] : menu.getReel(i);
+            int symbol = animTicksLeft > 0 ? animReels[i] : menu.getReel(i);
             symbol = Mth.clamp(symbol, 0, SlotSymbols.COUNT - 1);
             g.blit(SYMBOL_TEX[symbol], rx + 8, baseY + 8, 0, 0, 16, 16, 16, 16);
         }
