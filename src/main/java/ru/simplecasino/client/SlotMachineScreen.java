@@ -109,9 +109,7 @@ public class SlotMachineScreen extends AbstractContainerScreen<SlotMachineMenu> 
 
             int pad = 6;
             g.fill(rx + pad, baseY + pad, rx + 32 - pad, baseY + 32 - pad, SYMBOL_COLORS[symbol]);
-            String
-09:17
-label = SYMBOL_LABELS[symbol];
+            String label = SYMBOL_LABELS[symbol];
             int tw = font.width(label);
             g.drawString(font, label, rx + 16 - tw / 2, baseY + 12, 0xFF000000, false);
         }
