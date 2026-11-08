@@ -4,6 +4,8 @@
   "itemGroup.simplecasino": "Simple Casino",
   "gui.simplecasino.spin": "КРУТИТЬ",
   "gui.simplecasino.bet": "Ставка",
+  "gui.simplecasino.make_bet": "СДЕЛАТЬ СТАВКУ",
+  "gui.simplecasino.bet_label": "СТАВКА",
   "gui.simplecasino.bet_value": "Ставка: %s",
   "gui.simplecasino.win": "Выигрыш: %s",
   "message.simplecasino.not_enough_diamonds": "Не хватает алмазов!"
