@@ -4,6 +4,8 @@
   "itemGroup.simplecasino": "Simple Casino",
   "gui.simplecasino.spin": "SPIN",
   "gui.simplecasino.bet": "Bet",
+  "gui.simplecasino.make_bet": "CHANGE BET",
+  "gui.simplecasino.bet_label": "BET",
   "gui.simplecasino.bet_value": "Bet: %s",
   "gui.simplecasino.win": "Win: %s",
   "message.simplecasino.not_enough_diamonds": "Not enough diamonds!"
