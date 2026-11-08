@@ -97,7 +97,8 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         data.set(0, r0);
         data.set(1, r1);
         data.set(2, r2);
-
+        }
+    
         int win = 0;
         if (r0 == r1 && r1 == r2) {
             win = bet * SlotSymbols.tripleMultiplier(r0);
