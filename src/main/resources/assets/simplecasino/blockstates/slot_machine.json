@@ -1,5 +1,8 @@
 {
   "variants": {
-    "": { "model": "simplecasino:block/slot_machine" }
+    "facing=north": { "model": "simplecasino:block/slot_machine" },
+    "facing=south": { "model": "simplecasino:block/slot_machine", "y": 180 },
+    "facing=west":  { "model": "simplecasino:block/slot_machine", "y": 270 },
+    "facing=east":  { "model": "simplecasino:block/slot_machine", "y": 90 }
   }
 }
