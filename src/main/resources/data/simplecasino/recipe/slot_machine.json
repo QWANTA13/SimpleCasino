@@ -2,14 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "IRI",
-    "IDI",
-    "III"
+    "AAA",
+    "BDB",
+    "GIG"
   ],
   "key": {
-    "I": { "item": "minecraft:iron_ingot" },
-    "R": { "item": "minecraft:redstone" },
-    "D": { "item": "minecraft:diamond" }
+    "A": { "item": "minecraft:amethyst_block" },
+    "B": { "item": "minecraft:sweet_berries" },
+    "D": { "item": "minecraft:diamond" },
+    "G": { "item": "minecraft:gold_ingot" },
+    "I": { "item": "minecraft:iron_ingot" }
   },
   "result": {
     "id": "simplecasino:slot_machine",
