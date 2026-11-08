@@ -9,4 +9,6 @@
   "gui.simplecasino.bet_value": "Ставка: %s",
   "gui.simplecasino.win": "Выигрыш: %s",
   "message.simplecasino.not_enough_diamonds": "Не хватает алмазов!"
+  "message.simplecasino.not_enough_items": "Не хватает предметов для ставки!",
+  "message.simplecasino.empty_hand": "Возьми предмет в руку для ставки!"
 }
