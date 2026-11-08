@@ -7,7 +7,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import ru.simplecasino.registry.ModMenus;
@@ -32,15 +31,6 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         data.set(0, SlotSymbols.CHERRY);
         data.set(1, SlotSymbols.LEMON);
         data.set(2, SlotSymbols.SEVEN);
-
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, 104 + row * 18));
-            }
-        }
-        for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(playerInv, col, 8 + col * 18, 162));
-        }
 
         addDataSlots(data);
     }
@@ -86,7 +76,6 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         data.set(5, 0);
 
         int r0, r1, r2;
-        // \~18% шанс тройки (раньше было \~4%)
         if (random.nextInt(100) < 18) {
             int symbol = rollWeightedSymbol();
             r0 = r1 = r2 = symbol;
@@ -104,7 +93,7 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         if (r0 == r1 && r1 == r2) {
             win = bet * SlotSymbols.tripleMultiplier(r0);
         } else if (r0 == r1 || r1 == r2 || r0 == r2) {
-            win = bet / 2; // два одинаковых — половина ставки
+            win = bet / 2;
         }
 
         if (win > 0) {
@@ -144,8 +133,10 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         return true;
     }
 
-     private static void giveDiamonds(ServerPlayer player, int amount) {
-        ItemStack stack = new ItemStack(Items.DIAMOND, amount);
+    private static void giveDiamonds(ServerPlayer player, int amount) {
+        ItemSta
+09:15
+ck stack = new ItemStack(Items.DIAMOND, amount);
         if (!player.getInventory().add(stack)) {
             player.drop(stack, false);
         }
