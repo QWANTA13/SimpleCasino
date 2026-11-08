@@ -12,6 +12,15 @@ import ru.simplecasino.network.CycleBetPacket;
 import ru.simplecasino.network.ModMessages;
 import ru.simplecasino.network.SpinPacket;
 
+/**
+ * Layout matches user Paint mockup:
+ * - white panel, black borders
+ * - title top-left, bet amount top-right under "СТАВКА"
+ * - 3 reel windows
+ * - КРУТИТЬ (spin)
+ * - СДЕЛАТЬ СТАВКУ (cycle bet)
+ * - win text under cycle-bet button
+ */
 public class SlotMachineScreen extends AbstractContainerScreen<SlotMachineMenu> {
     private static final int ANIM_TICKS = 35;
 
@@ -22,17 +31,22 @@ public class SlotMachineScreen extends AbstractContainerScreen<SlotMachineMenu> 
             0xFF50C8FF,
             0xFFFFC828,
     };
-    private static final String[] SYMBOL_LABELS = {"C", "L", "7", "D", "B"};
+
+    private static final String[] SYMBOL_LABELS = {
+            "C", "L", "7", "D", "B"
+    };
 
     private int animTicksLeft = 0;
     private final int[] animReels = new int[3];
     private long lastAnimMs = 0;
 
-    public SlotMachineScreen(SlotMachineMenu menu, Inventory inv, Component title) {
+    public SlotMachineScreen(
+            SlotMachineMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         this.imageWidth = 176;
-        this.imageHeight = 100;
+        this.imageHeight = 150;
         this.inventoryLabelY = 1000;
+        this.titleLabelY = 1000;
     }
 
     @Override
@@ -41,16 +55,28 @@ public class SlotMachineScreen extends AbstractContainerScreen<SlotMachineMenu> 
         int x = leftPos;
         int y = topPos;
 
-        addRenderableWidget(Button.builder(Component.translatable("gui.simplecasino.bet"), b -> {
-            if (animTicksLeft > 0) return;
-            ModMessages.sendToServer(new CycleBetPacket());
-        }).bounds(x + 12, y + 70, 50, 20).build());
+        // КРУТИТЬ — spin
+        addRenderableWidget(Button.builder(
+                Component.translatable("gui.simplecasino.spin"),
+                b -> {
+                    if (animTicksLeft > 0) {
+                        return;
+                    }
+                    ModMessages.sendToServer(new SpinPacket());
+                    startAnimation();
+                }
+        ).bounds(x + 38, y + 78, 100, 20).build());
 
-        addRenderableWidget(Button.builder(Component.translatable("gui.simplecasino.spin"), b -> {
-            if (animTicksLeft > 0) return;
-            ModMessages.sendToServer(new SpinPacket());
-            startAnimation();
-        }).bounds(x + 70, y + 70, 60, 20).build());
+        // СДЕЛАТЬ СТАВКУ — cycle bet
+        addRenderableWidget(Button.builder(
+                Component.translatable("gui.simplecasino.make_bet"),
+                b -> {
+                    if (animTicksLeft > 0) {
+                        return;
+                    }
+                    ModMessages.sendToServer(new CycleBetPacket());
+                }
+        ).bounds(x + 28, y + 104, 120, 20).build());
     }
 
     private void startAnimation() {
@@ -64,76 +90,119 @@ public class SlotMachineScreen extends AbstractContainerScreen<SlotMachineMenu> 
     @Override
     protected void containerTick() {
         super.containerTick();
-        if (animTicksLeft > 0) {
-            animTicksLeft--;
-            long now = System.currentTimeMillis();
-            if (now - lastAnimMs > 50) {
-                lastAnimMs = now;
-                for (int i = 0; i < 3; i++) {
-                    int stopAt = ANIM_TICKS - (i + 1) * 8;
-                    if (animTicksLeft > stopAt) {
-                        animReels[i] = (animReels[i] + 1 + i) % SlotSymbols.COUNT;
-                    } else {
-                        animReels[i] = menu.getReel(i);
-                    }
-                }
-            }
-            if (animTicksLeft == 0) {
-                for (int i = 0; i < 3; i++) {
+        if (animTicksLeft <= 0) {
+            return;
+        }
+        animTicksLeft--;
+        long now = System.currentTimeMillis();
+        if (now - lastAnimMs > 50) {
+            lastAnimMs = now;
+            for (int i = 0; i < 3; i++) {
+                int stopAt = ANIM_TICKS - (i + 1) * 8;
+                if (animTicksLeft > stopAt) {
+                    animReels[i] = (animReels[i] + 1 + i) % SlotSymbols.COUNT;
+                } else {
                     animReels[i] = menu.getReel(i);
                 }
+            }
+        }
+        if (animTicksLeft == 0) {
+            for (int i = 0; i < 3; i++) {
+                animReels[i] = menu.getReel(i);
             }
         }
     }
 
     @Override
-    protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
+    protected void renderBg(
+            GuiGraphics g, float partialTick, int mouseX, int mouseY) {
         int x = leftPos;
         int y = topPos;
 
-        g.fill(x, y, x + imageWidth, y + imageHeight, 0xFFC6C6C6);
-        g.fill(x + 1, y + 1, x + imageWidth - 1, y + imageHeight - 1, 0xFF8B8B8B);
-        g.fill(x + 2, y + 2, x + imageWidth - 2, y + imageHeight - 2, 0xFFC6C6C6);
+        // outer dark border (like mockup)
+        g.fill(x, y, x + imageWidth, y + imageHeight, 0xFF1A1A1A);
+        // white panel
+        g.fill(x + 2, y + 2, x + imageWidth - 2, y + imageHeight - 2, 0xFFF5F5F5);
+        // thin black inner line
+        g.fill(x + 3, y + 3, x + imageWidth - 3, y + 4, 0xFF000000);
+        g.fill(x + 3, y + imageHeight - 4, x + imageWidth - 3, y + imageHeight - 3, 0xFF000000);
+        g.fill(x + 3, y + 3, x + 4, y + imageHeight - 3, 0xFF000000);
+        g.fill(x + imageWidth - 4, y + 3, x + imageWidth - 3, y + imageHeight - 3, 0xFF000000);
 
-        g.fill(x + 10, y + 16, x + imageWidth - 10, y + 62, 0xFF1A1A28);
-
-        int baseX = x + 34;
-        int baseY = y + 22;
+        // three reel windows
+        int baseX = x + 28;
+        int baseY = y + 28;
+        int size = 36;
+        int gap = 8;
         for (int i = 0; i < 3; i++) {
-            int rx = baseX + i * 38;
-            g.fill(rx - 1, baseY - 1, rx + 33, baseY + 33, 0xFF000000);
-            g.fill(rx, baseY, rx + 32, baseY + 32, 0xFF0A0A12);
+            int rx = baseX + i * (size + gap);
+            // black border
+            g.fill(rx - 1, baseY - 1, rx + size + 1, baseY + size + 1, 0xFF000000);
+            // white inside
+            g.fill(rx, baseY, rx + size, baseY + size, 0xFFFFFFFF);
 
-            int symbol = animTicksLeft > 0 ? animReels[i] : menu.getReel(i);
+            int symbol;
+            if (animTicksLeft > 0) {
+                symbol = animReels[i];
+            } else {
+                symbol = menu.getReel(i);
+            }
             symbol = Mth.clamp(symbol, 0, SlotSymbols.COUNT - 1);
 
             int pad = 6;
-            g.fill(rx + pad, baseY + pad, rx + 32 - pad, baseY + 32 - pad, SYMBOL_COLORS[symbol]);
+            g.fill(
+                    rx + pad,
+                    baseY + pad,
+                    rx + size - pad,
+                    baseY + size - pad,
+                    SYMBOL_COLORS[symbol]);
+
             String label = SYMBOL_LABELS[symbol];
             int tw = font.width(label);
-            g.drawString(font, label, rx + 16 - tw / 2, baseY + 12, 0xFF000000, false);
+            g.drawString(
+                    font,
+                    label,
+                    rx + size / 2 - tw / 2,
+                    baseY + size / 2 - 4,
+                    0xFF000000,
+                    false);
         }
     }
 
     @Override
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
-        g.drawString(font, title, 8, 6, 0x404040, false);
+        // title top-left
+        g.drawString(font, title, 8, 8, 0x000000, false);
 
-        String betText = Component.translatable("gui.simplecasino.bet_value", menu.getBetAmount()).getString();
-        g.drawString(font, betText, imageWidth - 8 - font.width(betText), 75, 0x203020, false);
+        // СТАВКА + amount top-right
+        String betLabel = Component.translatable("gui.simplecasino.bet_label").getString();
+        String betVal = String.valueOf(menu.getBetAmount());
+        String betLine = betLabel + " " + betVal;
+        int betW = font.width(betLine);
+        g.drawString(font, betLine, imageWidth - 10 - betW, 8, 0x000000, false);
 
+        // win under "СДЕЛАТЬ СТАВКУ" button (button at y=104, height 20 → text ~128)
         if (animTicksLeft == 0) {
             int win = menu.getLastWin();
             if (win > 0) {
-                g.drawString(font,
-                        Component.translatable("gui.simplecasino.win", win),
-                        8, 75, 0x006600, false);
+                Component winComp = Component.translatable(
+                        "gui.simplecasino.win", win);
+                String winStr = winComp.getString();
+                int ww = font.width(winStr);
+                g.drawString(
+                        font,
+                        winStr,
+                        imageWidth / 2 - ww / 2,
+                        128,
+                        0x006600,
+                        false);
             }
         }
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void render(
+            GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         renderBackground(g, mouseX, mouseY, partialTick);
         super.render(g, mouseX, mouseY, partialTick);
         renderTooltip(g, mouseX, mouseY);
