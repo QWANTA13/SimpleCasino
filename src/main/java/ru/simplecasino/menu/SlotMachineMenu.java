@@ -26,12 +26,10 @@ public class SlotMachineMenu extends AbstractContainerMenu {
     public SlotMachineMenu(int id, Inventory playerInv) {
         super(ModMenus.SLOT_MACHINE.get(), id);
         this.data = new SimpleContainerData(6);
-
         data.set(3, 0);
         data.set(0, SlotSymbols.CHERRY);
         data.set(1, SlotSymbols.LEMON);
         data.set(2, SlotSymbols.SEVEN);
-
         addDataSlots(data);
     }
 
@@ -45,7 +43,9 @@ public class SlotMachineMenu extends AbstractContainerMenu {
 
     public int getBetAmount() {
         int i = getBetIndex();
-        if (i < 0 || i >= BETS.length) return BETS[0];
+        if (i < 0 || i >= BETS.length) {
+            return BETS[0];
+        }
         return BETS[i];
     }
 
@@ -58,44 +58,46 @@ public class SlotMachineMenu extends AbstractContainerMenu {
     }
 
     public void cycleBet() {
-        data.set(3, (getBetIndex() + 1) % BETS.length);
+        int next = (getBetIndex() + 1) % BETS.length;
+        data.set(3, next);
     }
 
     public boolean trySpin(ServerPlayer player) {
-        if (isSpinning()) return false;
-
+        if (isSpinning()) {
+            return false;
+        }
         int bet = getBetAmount();
         if (!takeDiamonds(player, bet)) {
             player.displayClientMessage(
-                    net.minecraft.network.chat.Component.translatable("message.simplecasino.not_enough_diamonds"),
+                    net.minecraft.network.chat.Component.translatable(
+                            "message.simplecasino.not_enough_diamonds"),
                     true);
             return false;
         }
-
         data.set(4, 1);
         data.set(5, 0);
-
-        int r0, r1, r2;
+        int r0;
+        int r1;
+        int r2;
         if (random.nextInt(100) < 18) {
             int symbol = rollWeightedSymbol();
-            r0 = r1 = r2 = symbol;
+            r0 = symbol;
+            r1 = symbol;
+            r2 = symbol;
         } else {
             r0 = rollWeightedSymbol();
             r1 = rollWeightedSymbol();
             r2 = rollWeightedSymbol();
         }
-
         data.set(0, r0);
         data.set(1, r1);
         data.set(2, r2);
-
         int win = 0;
         if (r0 == r1 && r1 == r2) {
             win = bet * SlotSymbols.tripleMultiplier(r0);
         } else if (r0 == r1 || r1 == r2 || r0 == r2) {
             win = bet / 2;
         }
-
         if (win > 0) {
             giveDiamonds(player, win);
         }
@@ -106,10 +108,18 @@ public class SlotMachineMenu extends AbstractContainerMenu {
 
     private int rollWeightedSymbol() {
         int roll = random.nextInt(100);
-        if (roll < 35) return SlotSymbols.CHERRY;
-        if (roll < 60) return SlotSymbols.LEMON;
-        if (roll < 78) return SlotSymbols.DIAMOND;
-        if (roll < 92) return SlotSymbols.SEVEN;
+        if (roll < 35) {
+            return SlotSymbols.CHERRY;
+        }
+        if (roll < 60) {
+            return SlotSymbols.LEMON;
+        }
+        if (roll < 78) {
+            return SlotSymbols.DIAMOND;
+        }
+        if (roll < 92) {
+            return SlotSymbols.SEVEN;
+        }
         return SlotSymbols.BAR;
     }
 
@@ -119,13 +129,18 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         int total = 0;
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack stack = inv.getItem(i);
-            if (stack.is(Items.DIAMOND)) total += stack.getCount();
+            if (stack.is(Items.DIAMOND)) {
+                total += stack.getCount();
+            }
         }
-        if (total < amount) return false;
-
+        if (total < amount) {
+            return false;
+        }
         for (int i = 0; i < inv.getContainerSize() && left > 0; i++) {
             ItemStack stack = inv.getItem(i);
-            if (!stack.is(Items.DIAMOND)) continue;
+            if (!stack.is(Items.DIAMOND)) {
+                continue;
+            }
             int take = Math.min(left, stack.getCount());
             stack.shrink(take);
             left -= take;
@@ -134,9 +149,7 @@ public class SlotMachineMenu extends AbstractContainerMenu {
     }
 
     private static void giveDiamonds(ServerPlayer player, int amount) {
-        ItemSta
-09:15
-ck stack = new ItemStack(Items.DIAMOND, amount);
+        ItemStack stack = new ItemStack(Items.DIAMOND, amount);
         if (!player.getInventory().add(stack)) {
             player.drop(stack, false);
         }
