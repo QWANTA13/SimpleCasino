@@ -21,7 +21,8 @@ public final class ModBlocks {
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(ForgeRegistries.ITEMS, SimpleCasino.MOD_ID);
 
-    public static final RegistryObject<Block> SLOT_MACHINE = BLOCKS.register("slot_machine",
+    public static final RegistryObject<Block> SLOT_MACHINE = BLOCKS.register(
+            "slot_machine",
             () -> new SlotMachineBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.METAL)
                     .strength(3.5F)
@@ -29,7 +30,8 @@ public final class ModBlocks {
                     .sound(SoundType.METAL)
                     .noOcclusion()));
 
-    public static final RegistryObject<Item> SLOT_MACHINE_ITEM = ITEMS.register("slot_machine",
+    public static final RegistryObject<Item> SLOT_MACHINE_ITEM = ITEMS.register(
+            "slot_machine",
             () -> new BlockItem(SLOT_MACHINE.get(), new Item.Properties()));
 
     public static void register(IEventBus bus) {
