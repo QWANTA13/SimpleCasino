@@ -89,23 +89,28 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         data.set(4, 1);
         data.set(5, 0);
 
-        int r0;
-        int r1;
-        int r2;
-        if (random.nextInt(100) < 18) {
-            int symbol = rollWeightedSymbol();
-            r0 = symbol;
-            r1 = symbol;
-            r2 = symbol;
-        } else {
-            r0 = rollWeightedSymbol();
-            r1 = rollWeightedSymbol();
-            r2 = rollWeightedSymbol();
-        }
+        // 125 равных комбинаций (5×5×5)
+        int r0 = random.nextInt(SlotSymbols.COUNT);
+        int r1 = random.nextInt(SlotSymbols.COUNT);
+        int r2 = random.nextInt(SlotSymbols.COUNT);
 
         data.set(0, r0);
         data.set(1, r1);
         data.set(2, r2);
+
+        int win = 0;
+        if (r0 == r1 && r1 == r2) {
+            win = bet * SlotSymbols.tripleMultiplier(r0);
+        } else if (r0 == r1 || r1 == r2 || r0 == r2) {
+            win = bet / 2;
+        }
+
+        if (win > 0) {
+            giveItems(player, betItem, win);
+        }
+        data.set(5, win);
+        data.set(4, 0);
+        return true;
 
         int win = 0;
         if (r0 == r1 && r1 == r2) {
