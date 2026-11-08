@@ -20,11 +20,11 @@ public final class SlotSymbols {
     /** Payout multiplier for three matching symbols (bet * multiplier). */
     public static int tripleMultiplier(int symbol) {
         return switch (symbol) {
-            case CHERRY -> 2;
-            case LEMON -> 3;
-            case SEVEN -> 10;
-            case DIAMOND -> 5;
-            case BAR -> 20;
+            case CHERRY -> 4;
+            case LEMON -> 6;
+            case SEVEN -> 20;
+            case DIAMOND -> 10;
+            case BAR -> 40;
             default -> 0;
         };
     }
