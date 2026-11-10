@@ -131,7 +131,37 @@ public class SlotMachineMenu extends AbstractContainerMenu {
 
         if (win > 0) {
             giveItems(player, betItem, win);
+            player.serverLevel().playSound(
+                    null,
+                    player.getX(),
+                    player.getY(),
+                    player.getZ(),
+                    net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP,
+                    net.minecraft.sounds.SoundSource.PLAYERS,
+                    0.7F,
+                    1.2F);
+        } else {
+            player.serverLevel().playSound(
+                    null,
+                    player.getX(),
+                    player.getY(),
+                    player.getZ(),
+                    net.minecraft.sounds.SoundEvents.VILLAGER_NO,
+                    net.minecraft.sounds.SoundSource.PLAYERS,
+                    0.6F,
+                    0.8F);
         }
+
+        player.serverLevel().playSound(
+                null,
+                player.getX(),
+                player.getY(),
+                player.getZ(),
+                net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(),
+                net.minecraft.sounds.SoundSource.PLAYERS,
+                0.4F,
+                1.0F);
+
         data.set(5, win);
         data.set(4, 0);
         return true;
