@@ -1,0 +1,21 @@
+{
+  "block.simplecasino.slot_machine": "Slot Machine",
+  "item.simplecasino.slot_machine": "Slot Machine",
+  "itemGroup.simplecasino": "Simple Casino",
+  "gui.simplecasino.spin": "SPIN",
+  "gui.simplecasino.bet": "Bet",
+  "gui.simplecasino.make_bet": "CHANGE BET",
+  "gui.simplecasino.bet_label": "BET",
+  "gui.simplecasino.bet_value": "Bet: %s",
+  "gui.simplecasino.win": "Win: %s",
+  "message.simplecasino.not_enough_diamonds": "Not enough items!",
+  "message.simplecasino.not_enough_items": "Not enough items for this bet!",
+  "message.simplecasino.empty_hand": "Hold an item in your hand to bet!",
+  "block.simplecasino.blackjack_table": "Blackjack Table",
+  "item.simplecasino.blackjack_table": "Blackjack Table",
+  "message.simplecasino.bj_busy": "Game already running!",
+  "message.simplecasino.bj_full": "Table full (max 4)!",
+  "message.simplecasino.bj_already": "Already seated!",
+  "message.simplecasino.bj_joined": "Joined. Bet: %s",
+  "message.simplecasino.bj_need_two": "Need at least 2 players!"
+}

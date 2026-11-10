@@ -1,0 +1,21 @@
+{
+  "block.simplecasino.slot_machine": "Слот-машина",
+  "item.simplecasino.slot_machine": "Слот-машина",
+  "itemGroup.simplecasino": "Simple Casino",
+  "gui.simplecasino.spin": "КРУТИТЬ",
+  "gui.simplecasino.bet": "Ставка",
+  "gui.simplecasino.make_bet": "СДЕЛАТЬ СТАВКУ",
+  "gui.simplecasino.bet_label": "СТАВКА",
+  "gui.simplecasino.bet_value": "Ставка: %s",
+  "gui.simplecasino.win": "Выигрыш: %s",
+  "message.simplecasino.not_enough_diamonds": "Не хватает предметов!",
+  "message.simplecasino.not_enough_items": "Не хватает предметов для ставки!",
+  "message.simplecasino.empty_hand": "Возьми предмет в руку для ставки!",
+  "block.simplecasino.blackjack_table": "Стол блэкджека",
+  "item.simplecasino.blackjack_table": "Стол блэкджека",
+  "message.simplecasino.bj_busy": "Игра уже идёт!",
+  "message.simplecasino.bj_full": "Стол полон (макс. 4)!",
+  "message.simplecasino.bj_already": "Ты уже за столом!",
+  "message.simplecasino.bj_joined": "Ты сел. Ставка: %s",
+  "message.simplecasino.bj_need_two": "Нужно минимум 2 игрока!"
+}
