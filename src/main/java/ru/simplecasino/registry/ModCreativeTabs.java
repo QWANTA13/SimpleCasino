@@ -19,8 +19,10 @@ public final class ModCreativeTabs {
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.simplecasino"))
                     .icon(() -> new ItemStack(ModBlocks.SLOT_MACHINE_ITEM.get()))
-                    .displayItems((params, output) -> output.accept(ModBlocks.SLOT_MACHINE_ITEM.get());
-                        output.accept(ModBlocks.BLACKJACK_TABLE_ITEM.get()))
+                    .displayItems((params, output) -> {
+                        output.accept(ModBlocks.SLOT_MACHINE_ITEM.get());
+                        output.accept(ModBlocks.BLACKJACK_TABLE_ITEM.get());
+                    })
                     .build());
 
     public static void register(IEventBus bus) {
