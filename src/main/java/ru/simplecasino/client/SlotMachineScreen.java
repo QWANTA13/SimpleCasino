@@ -149,7 +149,12 @@ public class SlotMachineScreen extends AbstractContainerScreen<SlotMachineMenu> 
 
         String betLabel = Component.translatable(
                 "gui.simplecasino.bet_label").getString();
-        String betLine = betLabel + " " + menu.getBetAmount();
+        int betShow = menu.getBetAmount();
+        if (menu.isBetAll() && this.minecraft != null
+                && this.minecraft.player != null) {
+            betShow = menu.getBetAmount(this.minecraft.player);
+        }
+        String betLine = betLabel + " " + betShow;
         int betW = font.width(betLine);
         g.drawString(font, betLine, imageWidth - 10 - betW, 8, 0x000000, false);
 
