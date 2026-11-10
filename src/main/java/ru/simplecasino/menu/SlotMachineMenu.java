@@ -86,7 +86,7 @@ public class SlotMachineMenu extends AbstractContainerMenu {
             return false;
         }
 
-        data.set(4, 1);
+       data.set(4, 1);
         data.set(5, 0);
 
         // 125 равных комбинаций (5×5×5)
@@ -97,8 +97,7 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         data.set(0, r0);
         data.set(1, r1);
         data.set(2, r2);
-        }
-    
+
         int win = 0;
         if (r0 == r1 && r1 == r2) {
             win = bet * SlotSymbols.tripleMultiplier(r0);
@@ -112,6 +111,7 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         data.set(5, win);
         data.set(4, 0);
         return true;
+    }
 
         int win = 0;
         if (r0 == r1 && r1 == r2) {
