@@ -196,6 +196,18 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         }
     }
 
+    public static final int BET_ALL = BETS.length; // 4
+
+public void cycleBet() {
+    int next = (getBetIndex() + 1) % (BETS.length + 1);
+    data.set(3, next);
+}
+
+public int getBetAmount(Player player) {
+    if (!isBetAll()) return getBetAmount();
+    // count all of held item in inventory
+}
+    
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         return ItemStack.EMPTY;
