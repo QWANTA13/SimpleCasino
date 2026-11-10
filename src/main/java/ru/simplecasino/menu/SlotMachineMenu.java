@@ -16,6 +16,7 @@ import java.util.Random;
 
 public class SlotMachineMenu extends AbstractContainerMenu {
     public static final int[] BETS = {1, 5, 10, 20};
+    public static final int BET_ALL = BETS.length;
 
     private final ContainerData data;
     private final Random random = new Random();
@@ -42,12 +43,27 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         return data.get(3);
     }
 
+    public boolean isBetAll() {
+        return getBetIndex() == BET_ALL;
+    }
+
     public int getBetAmount() {
         int i = getBetIndex();
-        if (i < 0 || i >= BETS.length) {
-            return BETS[0];
+        if (i >= 0 && i < BETS.length) {
+            return BETS[i];
         }
-        return BETS[i];
+        return BETS[0];
+    }
+
+    public int getBetAmount(Player player) {
+        if (!isBetAll()) {
+            return getBetAmount();
+        }
+        ItemStack held = player.getMainHandItem();
+        if (held.isEmpty()) {
+            return 0;
+        }
+        return countItem(player, held.getItem());
     }
 
     public boolean isSpinning() {
@@ -59,7 +75,7 @@ public class SlotMachineMenu extends AbstractContainerMenu {
     }
 
     public void cycleBet() {
-        int next = (getBetIndex() + 1) % BETS.length;
+        int next = (getBetIndex() + 1) % (BETS.length + 1);
         data.set(3, next);
     }
 
@@ -77,7 +93,13 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         }
 
         Item betItem = held.getItem();
-        int bet = getBetAmount();
+        int bet = getBetAmount(player);
+        if (bet <= 0) {
+            player.displayClientMessage(
+                    Component.translatable("message.simplecasino.not_enough_items"),
+                    true);
+            return false;
+        }
 
         if (!takeItems(player, betItem, bet)) {
             player.displayClientMessage(
@@ -86,10 +108,9 @@ public class SlotMachineMenu extends AbstractContainerMenu {
             return false;
         }
 
-       data.set(4, 1);
+        data.set(4, 1);
         data.set(5, 0);
 
-        // 125 равных комбинаций (5×5×5)
         int r0 = random.nextInt(SlotSymbols.COUNT);
         int r1 = random.nextInt(SlotSymbols.COUNT);
         int r2 = random.nextInt(SlotSymbols.COUNT);
@@ -113,39 +134,7 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         return true;
     }
 
-        int win = 0;
-        if (r0 == r1 && r1 == r2) {
-            win = bet * SlotSymbols.tripleMultiplier(r0);
-        } else if (r0 == r1 || r1 == r2 || r0 == r2) {
-            win = bet / 2;
-        }
-
-        if (win > 0) {
-            giveItems(player, betItem, win);
-        }
-        data.set(5, win);
-        data.set(4, 0);
-        return true;
-    }
-
-    private int rollWeightedSymbol() {
-        int roll = random.nextInt(100);
-        if (roll < 35) {
-            return SlotSymbols.CHERRY;
-        }
-        if (roll < 60) {
-            return SlotSymbols.LEMON;
-        }
-        if (roll < 78) {
-            return SlotSymbols.DIAMOND;
-        }
-        if (roll < 92) {
-            return SlotSymbols.SEVEN;
-        }
-        return SlotSymbols.BAR;
-    }
-
-    private static int countItem(ServerPlayer player, Item item) {
+    private static int countItem(Player player, Item item) {
         int total = 0;
         Inventory inv = player.getInventory();
         for (int i = 0; i < inv.getContainerSize(); i++) {
@@ -196,18 +185,6 @@ public class SlotMachineMenu extends AbstractContainerMenu {
         }
     }
 
-    public static final int BET_ALL = BETS.length; // 4
-
-public void cycleBet() {
-    int next = (getBetIndex() + 1) % (BETS.length + 1);
-    data.set(3, next);
-}
-
-public int getBetAmount(Player player) {
-    if (!isBetAll()) return getBetAmount();
-    // count all of held item in inventory
-}
-    
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         return ItemStack.EMPTY;
