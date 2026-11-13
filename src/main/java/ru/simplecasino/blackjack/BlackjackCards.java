@@ -5,22 +5,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-/** Ranks 0..12 (A,2..10,J,Q,K), suits ignored for scoring. */
 public final class BlackjackCards {
     private BlackjackCards() {}
 
     public static int rank(int card) {
-        return card % 13;
+        return Math.floorMod(card, 13);
     }
 
-    public static int hardValue(int card) {
-        int r = rank(card);
-        if (r == 0) return 11; // Ace
-        if (r >= 10) return 10; // J Q K
-        return r + 1; // 2..10 -> rank 1..9 maps to 2..10
-    }
-
-    /** Best score <= 21, or minimum if all bust. */
     public static int score(List<Integer> hand) {
         int total = 0;
         int aces = 0;
@@ -56,7 +47,9 @@ public final class BlackjackCards {
     }
 
     public static String cardName(int card) {
-        String[] ranks = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
+        String[] ranks = {
+                "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"
+        };
         return ranks[rank(card)];
     }
 }
