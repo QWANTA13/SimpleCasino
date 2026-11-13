@@ -2,12 +2,15 @@ package ru.simplecasino.blackjack;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -20,10 +23,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-/**
- * Multiplayer blackjack: up to 4 players, winner takes the pot.
- * Bet = main-hand stack when joining.
- */
 public class BlackjackTableBlockEntity extends BlockEntity {
     public static final int MAX_PLAYERS = 4;
 
@@ -77,6 +76,18 @@ public class BlackjackTableBlockEntity extends BlockEntity {
         return lastResult;
     }
 
+    public int getPot() {
+        int pot = 0;
+        for (Seat s : seats) {
+            pot += s.betCount;
+        }
+        return pot;
+    }
+
+    public Item getPotItem() {
+        return seats.isEmpty() ? null : seats.get(0).betItem;
+    }
+
     public Seat getTurnSeat() {
         if (phase != Phase.PLAYING || seats.isEmpty()) {
             return null;
@@ -90,6 +101,15 @@ public class BlackjackTableBlockEntity extends BlockEntity {
     public boolean isPlayerTurn(UUID id) {
         Seat s = getTurnSeat();
         return s != null && s.id.equals(id);
+    }
+
+    public Seat getSeat(UUID id) {
+        for (Seat s : seats) {
+            if (s.id.equals(id)) {
+                return s;
+            }
+        }
+        return null;
     }
 
     public boolean tryJoin(ServerPlayer player) {
@@ -111,15 +131,24 @@ public class BlackjackTableBlockEntity extends BlockEntity {
             }
         }
         ItemStack held = player.getMainHandItem();
-        if (held.isEmpty() || held.getCount() < 1) {
+        if (held.isEmpty()) {
             player.displayClientMessage(
                     Component.translatable("message.simplecasino.empty_hand"), true);
+                return false;
+        }
+        if (!seats.isEmpty() && held.getItem() != seats.get(0).betItem) {
+            player.displayClientMessage(
+                    Component.literal("Ставь тот же предмет, что уже на столе!"), true);
             return false;
         }
         Item item = held.getItem();
         int count = held.getCount();
         held.shrink(count);
-        seats.add(new Seat(player.getUUID(), player.getGameProfile().getName(), item, count));
+        seats.add(new Seat(
+                player.getUUID(),
+                player.getGameProfile().getName(),
+                item,
+                count));
         setChanged();
         sync();
         player.displayClientMessage(
@@ -171,6 +200,9 @@ public class BlackjackTableBlockEntity extends BlockEntity {
         turnIndex = 0;
         advanceToActiveTurn();
         lastResult = "";
+        if (allDone()) {
+            finishRound();
+        }
         setChanged();
         sync();
         return true;
@@ -188,8 +220,8 @@ public class BlackjackTableBlockEntity extends BlockEntity {
         if (BlackjackCards.isBust(s.hand)) {
             s.bust = true;
             s.stood = true;
-            nextTurn();
         }
+        nextTurn();
         setChanged();
         sync();
         return true;
@@ -210,12 +242,8 @@ public class BlackjackTableBlockEntity extends BlockEntity {
         return true;
     }
 
-    public void tryReset(ServerPlayer player) {
+    public void clearForNext() {
         if (phase == Phase.PLAYING) {
-            return;
-        }
-        // refund if waiting
-        if (phase == Phase.WAITING) {
             return;
         }
         phase = Phase.WAITING;
@@ -223,16 +251,6 @@ public class BlackjackTableBlockEntity extends BlockEntity {
         deck.clear();
         turnIndex = 0;
         lastResult = "";
-        setChanged();
-        sync();
-    }
-
-    /** After finished, clear table for next game (no refund). */
-    public void clearForNext() {
-        phase = Phase.WAITING;
-        seats.clear();
-        deck.clear();
-        turnIndex = 0;
         setChanged();
         sync();
     }
@@ -246,19 +264,26 @@ public class BlackjackTableBlockEntity extends BlockEntity {
     }
 
     private void advanceToActiveTurn() {
-        while (turnIndex < seats.size()) {
+        int guard = 0;
+        while (turnIndex < seats.size() && guard++ < seats.size() + 2) {
             Seat s = seats.get(turnIndex);
             if (!s.stood && !s.bust) {
                 return;
             }
             turnIndex++;
         }
+        if (turnIndex >= seats.size()) {
+            for (int i = 0; i < seats.size(); i++) {
+                Seat s = seats.get(i);
+                if (!s.stood && !s.bust) {
+                    turnIndex = i;
+                    return;
+                }
+            }
+        }
     }
 
     private boolean allDone() {
-        if (turnIndex >= seats.size()) {
-            return true;
-        }
         for (Seat s : seats) {
             if (!s.stood && !s.bust) {
                 return false;
@@ -269,7 +294,6 @@ public class BlackjackTableBlockEntity extends BlockEntity {
 
     private void finishRound() {
         phase = Phase.FINISHED;
-        // find best score <= 21
         int best = -1;
         List<Seat> winners = new ArrayList<>();
         for (Seat s : seats) {
@@ -286,12 +310,8 @@ public class BlackjackTableBlockEntity extends BlockEntity {
             }
         }
 
-        int pot = 0;
-        Item potItem = null;
-        for (Seat s : seats) {
-            pot += s.betCount;
-            potItem = s.betItem;
-        }
+        int pot = getPot();
+        Item potItem = getPotItem();
 
         if (winners.isEmpty() || potItem == null) {
             lastResult = "Все перебрали — банк сгорел";
@@ -302,11 +322,9 @@ public class BlackjackTableBlockEntity extends BlockEntity {
             if (pl != null) {
                 give(pl, potItem, pot);
             } else {
-                // drop at table
                 dropAtTable(potItem, pot);
             }
         } else {
-            // split pot as evenly as possible
             int share = pot / winners.size();
             int rest = pot % winners.size();
             StringBuilder sb = new StringBuilder("Ничья: ");
@@ -362,21 +380,20 @@ public class BlackjackTableBlockEntity extends BlockEntity {
         int max = new ItemStack(item).getMaxStackSize();
         while (left > 0) {
             int n = Math.min(left, max);
-            net.minecraft.world.entity.item.ItemEntity e =
-                    new net.minecraft.world.entity.item.ItemEntity(
-                            level,
-                            worldPosition.getX() + 0.5,
-                            worldPosition.getY() + 1.0,
-                            worldPosition.getZ() + 0.5,
-                            new ItemStack(item, n));
-            level.addFreshEntity(e);
+            level.addFreshEntity(new ItemEntity(
+                    level,
+                    worldPosition.getX() + 0.5,
+                    worldPosition.getY() + 1.0,
+                    worldPosition.getZ() + 0.5,
+                    new ItemStack(item, n)));
             left -= n;
         }
     }
 
     private void sync() {
         if (level != null && !level.isClientSide) {
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            level.sendBlockUpdated(
+                    worldPosition, getBlockState(), getBlockState(), 3);
         }
     }
 
@@ -391,7 +408,9 @@ public class BlackjackTableBlockEntity extends BlockEntity {
             CompoundTag st = new CompoundTag();
             st.putUUID("Id", s.id);
             st.putString("Name", s.name);
-            st.putString("Item", net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(s.betItem).toString());
+            st.putString(
+                    "Item",
+                    BuiltInRegistries.ITEM.getKey(s.betItem).toString());
             st.putInt("Bet", s.betCount);
             st.putBoolean("Stood", s.stood);
             st.putBoolean("Bust", s.bust);
@@ -421,9 +440,13 @@ public class BlackjackTableBlockEntity extends BlockEntity {
         ListTag seatList = tag.getList("Seats", Tag.TAG_COMPOUND);
         for (int i = 0; i < seatList.size(); i++) {
             CompoundTag st = seatList.getCompound(i);
-            Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
-                    net.minecraft.resources.ResourceLocation.parse(st.getString("Item")));
-            Seat s = new Seat(st.getUUID("Id"), st.getString("Name"), item, st.getInt("Bet"));
+            Item item = BuiltInRegistries.ITEM.get(
+                    ResourceLocation.parse(st.getString("Item")));
+            Seat s = new Seat(
+                    st.getUUID("Id"),
+                    st.getString("Name"),
+                    item,
+                    st.getInt("Bet"));
             s.stood = st.getBoolean("Stood");
             s.bust = st.getBoolean("Bust");
             ListTag hand = st.getList("Hand", Tag.TAG_COMPOUND);
@@ -442,7 +465,9 @@ public class BlackjackTableBlockEntity extends BlockEntity {
     }
 
     @Override
-    public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
+    public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
+            getUpdatePacket() {
+        return net.minecraft.network.protocol.game
+                .ClientboundBlockEntityDataPacket.create(this);
     }
 }
